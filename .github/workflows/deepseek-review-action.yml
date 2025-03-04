@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-      - name: Run Gemini AI Code Reviewer
+      - name: Run Deepseek AI Code Reviewer
         env:
           AI_PROVIDER: ${{ secrets.AI_PROVIDER }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
