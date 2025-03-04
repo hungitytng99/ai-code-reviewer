@@ -168,7 +168,9 @@ class AIProviderFactory:
         return provider
 
 # Initialize AI provider
-ai_provider = AIProviderFactory.get_provider('deepseek')
+ai_provider = AIProviderFactory.get_provider(os.environ.get('AI_PROVIDER', 'deepseek'))
+print(f"Initialized AI provider: {ai_provider.get_name()}")
+print(f"AI provider model: {ai_provider.model}")
 
 class PRDetails:
     def __init__(self, owner: str, repo: str, pull_number: int, title: str, description: str):
