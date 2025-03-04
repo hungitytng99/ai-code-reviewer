@@ -9,12 +9,13 @@ class DeepseekProvider(AIProvider):
     """Deepseek AI provider implementation."""
 
     def __init__(self):
-        self.api_url = "https://api.deepseek.com/v1/chat/completions"  # Example URL, adjust as needed
+        self.api_url = "https://api.deepseek.com/chat/completions"
         self.api_key = None
         self.model = None
         self.config = {
             "temperature": 0.8,
-            "max_tokens": 8192
+            "max_tokens": 8192,
+            "stream": False
         }
 
     def configure(self) -> None:
@@ -22,7 +23,7 @@ class DeepseekProvider(AIProvider):
         self.api_key = os.environ.get('DEEPSEEK_API_KEY')
         if not self.api_key:
             raise ValueError("DEEPSEEK_API_KEY environment variable is required")
-        self.model = os.environ.get('DEEPSEEK_MODEL', 'deepseek-coder-33b-instruct')
+        self.model = os.environ.get('DEEPSEEK_MODEL', 'deepseek-chat')
 
     def generate_review(self, prompt: str) -> List[Dict[str, Any]]:
         """Generate code review using Deepseek AI."""
@@ -35,14 +36,26 @@ class DeepseekProvider(AIProvider):
             data = {
                 "model": self.model,
                 "messages": [
+                    {"role": "system", "content": "You are an expert code reviewer. Provide detailed, constructive feedback in JSON format."},
                     {"role": "user", "content": prompt}
                 ],
                 "temperature": self.config["temperature"],
-                "max_tokens": self.config["max_tokens"]
+                "max_tokens": self.config["max_tokens"],
+                "stream": self.config["stream"]
             }
 
             response = requests.post(self.api_url, headers=headers, json=data)
-            response.raise_for_status()
+            
+            if not response.ok:
+                error_msg = f"{response.status_code} {response.reason}"
+                try:
+                    error_data = response.json()
+                    if 'error' in error_data:
+                        error_msg += f": {error_data['error'].get('message', '')}"
+                except:
+                    pass
+                print(f"Deepseek API error: {error_msg}")
+                return []
             
             response_data = response.json()
             response_text = response_data['choices'][0]['message']['content'].strip()
