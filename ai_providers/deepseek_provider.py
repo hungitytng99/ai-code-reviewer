@@ -32,7 +32,7 @@ class DeepseekProvider(AIProvider):
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {self.api_key}"
             }
-            
+
             data = {
                 "model": self.model,
                 "messages": [
@@ -58,6 +58,8 @@ class DeepseekProvider(AIProvider):
                 return []
             
             response_data = response.json()
+            print(f"API Response Body: {response_data}")
+
             response_text = response_data['choices'][0]['message']['content'].strip()
 
             if response_text.startswith('```json'):
@@ -65,7 +67,6 @@ class DeepseekProvider(AIProvider):
             if response_text.endswith('```'):
                 response_text = response_text[:-3]
             response_text = response_text.strip()
-
             try:
                 data = json.loads(response_text)
                 if "reviews" in data and isinstance(data["reviews"], list):
